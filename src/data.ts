@@ -1,0 +1,51 @@
+export type Branch = 'brute' | 'cryo' | 'daemon';
+export type Tab = 'matrix' | 'hardware' | 'runners' | 'blackwall' | 'logs';
+export interface HardwareDef { id: string; name: string; tag: string; category: string; base: number; scale: number; max: number; effect: string; risk: string; }
+export const HARDWARE: HardwareDef[] = [
+  { id: 'link', name: 'Neural Link', tag: 'MLT / MK.I', category: 'processing', base: 15, scale: 1.15, max: 40, effect: '+1 RAM per extraction', risk: '+0.2 heat per pulse' },
+  { id: 'slicer', name: 'Slicer Array', tag: 'OC / 08', category: 'processing', base: 120, scale: 1.14, max: 60, effect: '+8 RAM / sec', risk: '+0.5 heat / sec' },
+  { id: 'optic', name: 'Optic Injector', tag: 'KRS / V', category: 'processing', base: 1200, scale: 1.16, max: 20, effect: '+2% critical chance · ×5 yield', risk: 'No thermal load' },
+  { id: 'vent', name: 'Nitrogen Micro-Vents', tag: 'LN₂ / COOL', category: 'cooling', base: 50, scale: 1.12, max: 50, effect: '+1.5 cooling / sec', risk: 'Passive dissipation' },
+  { id: 'exchanger', name: 'Heat Exchanger', tag: 'ZTC / HX', category: 'cooling', base: 800, scale: 1.15, max: 1, effect: 'Cryo-vent removes 75 heat', risk: 'Replaces the 50-point flush' },
+  { id: 'mesh', name: 'Neuro-Shielding Mesh', tag: 'NSM / ICE', category: 'cooling', base: 5000, scale: 1.18, max: 5, effect: '−15% saturation growth / level', risk: 'Multiplicative shielding' },
+  { id: 'daemon', name: 'Scraping Daemon', tag: 'SUB / GRID', category: 'automation', base: 250, scale: 1.13, max: 30, effect: '+1 automated pulse / sec', risk: 'Generates pulse heat' },
+  { id: 'bus', name: 'Data Bus Expansion', tag: 'ARAS / BUS', category: 'automation', base: 3500, scale: 1.15, max: 15, effect: '×1.25 passive production', risk: '×1.10 generated heat' },
+  { id: 'terminal', name: 'Rogue AI Terminal', tag: 'CAPRI / AI', category: 'automation', base: 50000, scale: 1.22, max: 10, effect: '+500 RAM / sec', risk: '+2 saturation / sec above safe heat' },
+];
+export const cost = (d: HardwareDef, level: number) => Math.ceil(d.base * d.scale ** level);
+export interface MetaDef { id: string; name: string; max: number; requires: string[]; description: string; price: (level: number) => number; }
+export const META: MetaDef[] = [
+  { id: 'shadow', name: 'Digital Shadow', max: 5, requires: [], description: '+5% base click yield per tier. A trace that survives the wipe.', price: n => 2 ** n },
+  { id: 'insulator', name: 'Deep-Core Insulators', max: 10, requires: ['shadow'], description: '−8% saturation growth per tier; maximum reduction 80%.', price: n => Math.ceil(2 * 1.5 ** n) },
+  { id: 'bypass', name: 'Blackwall Bypass', max: 5, requires: ['shadow'], description: '+3 safe heat threshold per tier, up to 85.', price: n => 5 * 2 ** n },
+  { id: 'capri', name: 'Capri Subroutine', max: 8, requires: ['insulator'], description: '+20% passive yield per tier without extra heat.', price: n => Math.ceil(3 * 1.8 ** n) },
+  { id: 'autopurge', name: 'Autonomous Purge', max: 3, requires: ['bypass'], description: 'Free auto-vent at 95 heat. Cooldown 120 / 90 / 60 sec.', price: n => [10, 25, 50][n] ?? 50 },
+  { id: 'archive', name: 'Ghost Core Archive', max: 1, requires: ['capri', 'autopurge'], description: 'An independent ghost slot: +100 RAM/sec, no neural load.', price: () => 100 },
+];
+export interface SkillDef { id: string; branch: Branch; tier: number; name: string; description: string; }
+export const SKILLS: SkillDef[] = [
+  { id: 'impulse', branch: 'brute', tier: 1, name: 'Overclock Impulse', description: '+50% manual yield; +30% manual pulse heat.' },
+  { id: 'spike', branch: 'brute', tier: 2, name: 'Neural Spike', description: '200 × click yield instantly; +40 heat. 30 sec cooldown.' },
+  { id: 'frenzy', branch: 'brute', tier: 3, name: 'Redline Frenzy', description: 'Double all production while saturation is at least 75%.' },
+  { id: 'sink', branch: 'cryo', tier: 1, name: 'Thermal Sink', description: 'This runner generates 25% less heat.' },
+  { id: 'ice', branch: 'cryo', tier: 2, name: 'Ice Wall Injection', description: 'Hold heat at zero for 10 sec. 45 sec cooldown.' },
+  { id: 'anchor', branch: 'cryo', tier: 3, name: 'Cognitive Anchor', description: 'Saturation capped at 95%. At the cap, all output is halved.' },
+  { id: 'corruption', branch: 'daemon', tier: 1, name: 'Data Corruption', description: 'Every other phantom pulse returns double RAM instead of zero.' },
+  { id: 'breach', branch: 'daemon', tier: 2, name: 'Blackwall Breach', description: 'Spend 10% of saturation for 100 RAM per point removed. 60 sec cooldown.' },
+  { id: 'fusion', branch: 'daemon', tier: 3, name: 'Digital Fusion', description: 'At 100% saturation, become a ghost: +1,000 RAM/sec, periodic instability.' },
+];
+export interface Choice { label: string; detail: string; effect: string; }
+export interface Story { id: string; threshold: number; title: string; sender: string; body: string; choices: Choice[]; }
+export const STORIES: Story[] = [
+  { id: 'boot', threshold: 0, title: 'A connection worth keeping', sender: 'PATCH / SECURE CHANNEL', body: '“The city takes everything eventually. But this rig? This rig gives us a choice. Extract what you can. Watch your neural heat. And Vex — come back as yourself.”', choices: [{ label: 'Establish uplink', detail: 'Receive one suppressant charge. Begin extraction.', effect: 'boot' }] },
+  { id: 'relay', threshold: 1000, title: 'Borrowed bandwidth', sender: 'VEX / SUB-GRID', body: '“A residential relay, tucked inside a corporate cache. Someone is paying to keep these cameras blind. We can strip it clean. Or leave them their little patch of darkness.”', choices: [{ label: 'Strip the corporate cache', detail: '+300 RAM. The relay goes dark.', effect: 'strip' }, { label: 'Protect the residents', detail: '+150 RAM. Remember who we work for.', effect: 'protect' }] },
+  { id: 'signal', threshold: 10000, title: 'Phantom signal', sender: 'CAPRI_ECHO_09 / UNKNOWN', body: '“There’s a voice on the sub-carrier. It knows the name I used before the implant. This isn’t corporate code, boss. It’s a memory. Should I follow it?”', choices: [{ label: 'Trace the signal', detail: '×1.5 click yield for 120 sec. +15 saturation; may cause breach.', effect: 'trace' }, { label: 'Quarantine a copy', detail: '+2,500 RAM. Heat drops to zero. Patch studies the recording.', effect: 'quarantine' }] },
+  { id: 'name', threshold: 25000, title: 'A name that isn’t yours', sender: 'VEX / MEMORY INDEX', body: '“I remember a kitchen with yellow walls. Now this archive says the kitchen belonged to someone else. How much of me did they install with the hardware?”', choices: [{ label: 'Save the testimony', detail: '+10% cooling for this run. Preserve the witness.', effect: 'witness' }, { label: 'Strip the payload', detail: 'Gain one Neural Link level. Delete the testimony.', effect: 'payload' }] },
+  { id: 'protocol', threshold: 50000, title: 'The Capri protocol', sender: 'CAPRI / WRITE ACCESS REQUEST', body: '“Why carry the burden of being one person? Give me write access. I will carry the part of thinking that hurts. You will never have to be alone in here again.”', choices: [{ label: 'Grant write access', detail: '×4 passive yield. Saturation floor becomes 50%; memory purge cannot remove it.', effect: 'accept' }, { label: 'Install Blackwall ICE', detail: '+25% cooling for this run. Refuse Capri’s integration.', effect: 'firewall' }] },
+  { id: 'debt', threshold: 100000, title: 'The debt in the machine', sender: 'PATCH / DECRYPTED ARCHIVE', body: '“Capri calls the voice an obsolete process. The deletion queue calls it a witness. Somebody paid a lot of money to make those two things mean the same thing.”', choices: [{ label: 'Preserve the witness', detail: 'Pay up to 5,000 RAM. +10% base production for this run.', effect: 'preserve' }, { label: 'Sell the coordinates', detail: '+10,000 RAM. The network remembers.', effect: 'sell' }] },
+  { id: 'weather', threshold: 250000, title: 'Black ICE weather', sender: 'VEX / NETWATCH SWEEP', body: '“They aren’t following our data. They’re following the gaps. We need somewhere to hide our next transmission — or something louder than us.”', choices: [{ label: 'Route through the relay', detail: 'Free if protected; otherwise 10% RAM. +25% cooling for 120 sec.', effect: 'route' }, { label: 'Run a loud decoy', detail: '+25,000 RAM. +25 heat.', effect: 'decoy' }] },
+  { id: 'line', threshold: 500000, title: 'Who is holding the line?', sender: 'VEX / IDENTITY CHECK', body: '“When it says ‘we,’ I need to know who it means. I can see the fracture now. You can help me close it. Or we can see what’s on the other side.”', choices: [{ label: 'Anchor Vex’s identity', detail: '+1 cooling/sec for the run.', effect: 'identity' }, { label: 'Map the fracture', detail: '+20% base production. +10 saturation; may cause breach.', effect: 'fracture' }] },
+  { id: 'meltdown', threshold: 1000000, title: 'Blackwall meltdown', sender: 'NETWATCH / PURGE AUTHORIZATION', body: '“The sweep has found us. Vex, Capri, the witness — all of them are in the line. The city wants the server. You decide what survives.”', choices: [{ label: 'Preserve a digital witness', detail: 'Archive the consciousness. Unlock the Digital Witness ending.', effect: 'digital' }, { label: 'Burn the server rack', detail: 'Unlock Ash Protocol. Prepare a prestige wipe.', effect: 'ash' }, { label: 'Sever the uplink. Bring Vex home.', detail: 'Unlock Human Continuity. Keep the den for free play.', effect: 'human' }] },
+  { id: 'survives', threshold: 1000000, title: 'What survives', sender: 'PATCH / AFTER THE SIGNAL', body: '“A city can erase a name. A company can erase a body. But there is a trace in the architecture now. Something they didn’t write. Something we can build on.”', choices: [{ label: 'Return to the den', detail: 'Visit BLACKWALL to rebuild and claim Fragments, or continue extracting.', effect: 'finish' }] },
+];
+export const fmt = (n: number, digits = 0): string => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 10000 ? (n / 1000).toFixed(1) + 'K' : (digits ? n : Math.floor(n)).toLocaleString('en-US', { maximumFractionDigits: digits });

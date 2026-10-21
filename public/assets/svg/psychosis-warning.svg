@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Glitch Warning Frame -->
+  <polygon points="64,10 120,108 8,108" fill="#1a0008" stroke="#ff0055" stroke-width="3" stroke-linejoin="round" filter="url(#glow-red)" />
+  <polygon points="64,24 108,100 20,100" fill="none" stroke="#ffaa00" stroke-width="1.5" stroke-dasharray="10 4" />
+
+  <!-- Cyber Skull / Neural Splinter Icon -->
+  <path d="M50 48 H78 V62 H72 V72 H66 V82 H62 V82 H56 V72 H50 V62 Z" fill="#ff0055" filter="url(#glow-red)" />
+  <!-- Eye Sockets -->
+  <rect x="54" y="52" width="6" height="6" fill="#000000" />
+  <rect x="68" y="52" width="6" height="6" fill="#000000" />
+  <!-- Nose Slot -->
+  <rect x="62" y="60" width="4" height="4" fill="#000000" />
+  
+  <!-- Exclamation / Circuit Teeth -->
+  <rect x="54" y="68" width="3" height="8" fill="#ffaa00" />
+  <rect x="62.5" y="68" width="3" height="8" fill="#ffaa00" />
+  <rect x="71" y="68" width="3" height="8" fill="#ffaa00" />
+  <rect x="62" y="86" width="4" height="4" fill="#ff0055" filter="url(#glow-red)" />
+</svg>
