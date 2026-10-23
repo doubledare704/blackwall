@@ -2,6 +2,10 @@
 
 A playable 2D cyberpunk incremental game built with **Phaser 4.2.1**, **TypeScript 7.0.2**, and **Vite 8.3.5**. Assets, fonts, synthesized audio, story, and saves are local. No backend or API keys are required.
 
+**Play online:** [blackwall-drift.vercel.app](https://blackwall-drift.vercel.app/)
+
+Production is hosted on Vercel. Once the CLI is linked to this project, deploy updates with `vercel deploy --prod`. The tracked `vercel.json` specifies the Vite build and `dist` output; account-specific `.vercel` metadata stays ignored.
+
 ## Run
 
 Use Node.js 22.12+ (developed and checked with Node 26).
